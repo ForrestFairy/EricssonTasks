@@ -22,7 +22,13 @@ void main () {
 }
 
 void binToDec (char * toChange) {
-
+    int base = 1, answer = 0;
+    for (int i = strlen(toChange) - 1; i >= 0; i--) {
+        int current = toChange[i] - '0';
+        answer += base * current;
+        base *= 2;
+    }
+    printf("%d\n", answer);
 }
 
 void decToBin (char * toChange) {
@@ -44,8 +50,9 @@ void decToBin (char * toChange) {
     }
     toReverse[i] = '\0';
     
-    for (int i = strlen(toReverse); i >= 0; i--) {
+    for (int i = strlen(toReverse) - 1; i >= 0; i--) {
         printf("%c", toReverse[i]);
     }
+
     printf("\n");
 }
