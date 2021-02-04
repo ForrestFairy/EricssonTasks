@@ -19,7 +19,7 @@ split_file(Inbinary) ->
 
 %here A, B as binaries
 split_into_tuples({A, B}, List) when size(B) == 0 ->
-    [List | binary_to_list(A)];
+    [List | A];
 split_into_tuples({A, B}, List) ->
     split_into_tuples(split_binary(B, 8), [List | binary_to_list(A)]).
 
