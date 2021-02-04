@@ -1,58 +1,43 @@
 -module(zadanie1).
--export([change/1]).
+-export([convert/1]).
 
-change(File) -> 
-    %read from file
-    {ok, Inbinary} = file:read_file(File),
-    
-    {All, Bad, Good} = process_input(Inbinary),
+convert(File) ->
+    {ok, Binary} = file:read_file(File),
+    List = process_objects(Binary),
+    % now there is a list o bitstrings
+    {All, Bad, ListOfGood} = count_objects(List),
+    % if there is no output.txt this will create it
+    % if there is just updates
     {ok, Output} = file:open("output.txt", [write]),
-    io:format(Output, "~p\n~p\n~p", [All, Bad, Good]),
-    {All, Bad, Good}.
+    io:fwrite(Output, "~p\n~p\n~s", [All, Bad, ListOfGood]).
 
-process_input(Inbinary) ->
-    List = split_file(Inbinary),
-    process(List, 0, 0, []).
+process_objects(Binary) -> process_objects(split_binary(Binary, 8), []).
 
-split_file(Inbinary) ->
-    split_into_tuples(split_binary(Inbinary, 8), []).
+process_objects({Object, Rest}, List) when size(Rest) < 1 -> List ++ [Object];
+process_objects({Object, Rest}, List) ->
+    process_objects(split_binary(Rest, 8), List ++ [Object]).
 
-%here A, B as binaries
-split_into_tuples({A, B}, List) when size(B) == 0 ->
-    [List | A];
-split_into_tuples({A, B}, List) ->
-    split_into_tuples(split_binary(B, 8), [List | binary_to_list(A)]).
+count_objects(List) -> 
+    count_objects(List, 0, 0, []).
 
-process([], All, Bad, Good) -> {All, Bad, Good};
+count_objects([], All, Bad, ListOfGood) ->
+    {All, Bad, ListOfGood};
 
-process([Head | Tail], All, Bad, Good) ->
-    
-    case check_if_good(Head) of
-        false ->
-            %if an object is bad count it and add to bad ones
-            process(Tail, All + 1, Bad + 1, Good);
+count_objects([Head | Tail], All, Bad, ListOfGood) ->
+    case is_good(binary_to_list(Head)) of
+        false -> 
+            count_objects(Tail, All + 1, Bad + 1, ListOfGood);
         true ->
-            %if an object is good count it and add to the list of good ones
-            process(Tail, All + 1, Bad, [Good | binary_to_list(Head)])
-        end;
-process(Head, All, Bad, Good) ->
-    case check_if_good(Head) of
-        false ->
-            %if an object is bad count it and add to bad ones
-            {All + 1, Bad + 1, Good};
-        true ->
-            %if an object is good count it and add to the list of good ones
-            {All + 1, Bad, [Good | Head]}
+            % need to check if [List|Head] is fine
+            count_objects(Tail, All + 1, Bad, ListOfGood ++ [Head])
         end.
 
-check_if_good(Check) ->
-    Control = Check rem 10,
-    ID = Check div 10000,
-    is_good(Control, ID rem 10).
-
-% Control and should be the same as the last digit of ID in binary
-% because the last digit tells if binary is odd or even
-is_good(Control, Control) ->
+% if all message bits are equal to 48 = '0' it's bad object
+is_good([_, _, _, _, 48, 48, 48, _]) ->
+    false;
+% last bit of id indicates if it's even or odd
+% so it need to be the same as check bit
+is_good([_, _, _, Check, _, _, _, Check]) -> 
     true;
-is_good(_, _) ->
+is_good(_Object) ->
     false.
