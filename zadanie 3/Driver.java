@@ -9,8 +9,13 @@ public class Driver {
     
     public static void main(String[] args) {
 
-        int time = Integer.valueOf(args[0]);
-        Car car = new Car(time);
+        if (args.length > 0) {
+            int time = Integer.valueOf(args[0]);
+            Car car = new Car(time);
+        }
+        else {
+            Car car = new Car();
+        } 
         while (true) {}
     } 
 }
