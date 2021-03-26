@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void binToDec (char * toChange);
 void decToBin (char * toChange);
 
 void main () {
     int option;
-    char * toChange;
+    char * toChange = (char*) malloc(100 * sizeof(char));
     printf("Enter code and number to convert: \n(10 for decimal to binary, 2 for binary to decimal)\n");
     scanf("%d %s", &option, toChange);
     printf("%s\n", toChange);
